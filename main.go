@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -137,5 +138,9 @@ func generatePDF(user User, body string) error {
 	pdf.SetFont("Helvetica", "", 9)
 	pdf.CellFormat(rightW, 4, sanitize(tr, user.Phone), "", 1, "L", false, 0, "")
 
-	return pdf.OutputFileAndClose("FahadFaruqiCoverLetter.pdf")
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	return pdf.OutputFileAndClose(filepath.Join(home, "Downloads", "FahadFaruqiCoverLetter.pdf"))
 }
