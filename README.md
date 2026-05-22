@@ -25,12 +25,11 @@ Optional fields:
 - `filename` — what to name the file. Defaults to `<Name>NoSpacesCoverLetter.pdf`.
 
 ## How to use
-
-1. Write or paste your cover letter body into any app (Notes, ChatGPT, etc)
-2. Copy it to your clipboard
-3. Run the app:
+1. Copy your cover letter to your clipboard (just the part that matters)
+2. Run the app:
    - Double-click `cover-letter-writter` if you have the downloaded version
    - Or open Terminal, go to this folder, and run: `go run .`
-4. Find the PDF in your Downloads folder (or wherever you set `outputDir`)
+   - Or if you have a compiled version, `./cover-letter-writter` 
+3. Find the PDF in your Downloads folder (or wherever you set `outputDir`)
 
 Done.
