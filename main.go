@@ -13,10 +13,12 @@ import (
 )
 
 type User struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Email   string `json:"email"`
-	Phone   string `json:"phone"`
+	Name      string `json:"name"`
+	Address   string `json:"address"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone"`
+	OutputDir string `json:"outputDir"`
+	Filename  string `json:"filename"`
 }
 
 func main() {
@@ -73,7 +75,7 @@ func generatePDF(user User, body string) error {
 	// header
 	pdf.SetY(20)
 	pdf.SetFont("Times", "B", 28)
-	pdf.CellFormat(0, 12, "Fahad Faruqi", "", 1, "C", false, 0, "")
+	pdf.CellFormat(0, 12, sanitize(tr, user.Name), "", 1, "C", false, 0, "")
 
 	pdf.SetTextColor(0, 0, 0)
 	pdf.SetDrawColor(180, 180, 180)
@@ -106,7 +108,7 @@ func generatePDF(user User, body string) error {
 	// closing
 	pdf.Ln(8)
 	pdf.SetX(leftX)
-	pdf.MultiCell(leftW, 5.5, sanitize(tr, "Best regards,\nFahad Faruqi"), "", "L", false)
+	pdf.MultiCell(leftW, 5.5, sanitize(tr, "Best regards,\n"+user.Name), "", "L", false)
 
 	// right column contact info
 	pdf.SetXY(rightX, bodySecYCord)
@@ -138,9 +140,17 @@ func generatePDF(user User, body string) error {
 	pdf.SetFont("Helvetica", "", 9)
 	pdf.CellFormat(rightW, 4, sanitize(tr, user.Phone), "", 1, "L", false, 0, "")
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return err
+	outDir := user.OutputDir
+	if outDir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		outDir = filepath.Join(home, "Downloads")
 	}
-	return pdf.OutputFileAndClose(filepath.Join(home, "Downloads", "FahadFaruqiCoverLetter.pdf"))
+	fname := user.Filename
+	if fname == "" {
+		fname = strings.ReplaceAll(user.Name, " ", "") + "CoverLetter.pdf"
+	}
+	return pdf.OutputFileAndClose(filepath.Join(outDir, fname))
 }
