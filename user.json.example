@@ -1,0 +1,8 @@
+{
+  "name": "Your Name",
+  "address": "Your City, State",
+  "email": "you@example.com",
+  "phone": "(555) 123-4567",
+  "outputDir": "/Users/you/Downloads",
+  "filename": "YourNameCoverLetter.pdf"
+}

@@ -12,16 +12,17 @@ Turn clipboard text into a formatted PDF cover letter. No typing into templates,
 
 ## Setup
 
-Create a file named `user.json` in the same folder as the app. Paste this in and fill in your details:
+Copy `user.json.example` to `user.json` and fill in your details:
 
-```json
-{
-  "name": "Your Name",
-  "address": "Your City, State",
-  "email": "you@example.com",
-  "phone": "(555) 123-4567"
-}
 ```
+cp user.json.example user.json
+```
+
+Required fields: `name`, `address`, `email`, `phone`.
+
+Optional fields:
+- `outputDir` — where to save the PDF. Defaults to your Downloads folder.
+- `filename` — what to name the file. Defaults to `<Name>NoSpacesCoverLetter.pdf`.
 
 ## How to use
 
@@ -30,6 +31,6 @@ Create a file named `user.json` in the same folder as the app. Paste this in and
 3. Run the app:
    - Double-click `cover-letter-writter` if you have the downloaded version
    - Or open Terminal, go to this folder, and run: `go run .`
-4. Find `FahadFaruqiCoverLetter.pdf` in your Downloads folder
+4. Find the PDF in your Downloads folder (or wherever you set `outputDir`)
 
 Done.
