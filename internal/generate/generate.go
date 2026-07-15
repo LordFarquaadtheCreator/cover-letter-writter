@@ -16,6 +16,7 @@ import (
 type Input struct {
 	ProfileID string `json:"profileId" jsonschema:"required,ID of the profile to use (from create_profile or list_profiles). Mandatory."`
 	Body      string `json:"body" jsonschema:"required,The cover letter body text. Plain text — the agent writes or drafts this."`
+	To        string `json:"to,omitempty" jsonschema:"Recipient salutation line (e.g. 'Dear Hiring Manager,' or 'Dear Jane Doe,'). Defaults to 'To Whom it May Concern,'."`
 	OutputDir string `json:"outputDir,omitempty" jsonschema:"Override profile's outputDir. Defaults to ~/Downloads if neither set."`
 	Filename  string `json:"filename,omitempty" jsonschema:"Override profile's filename. Defaults to <Name>NoSpacesCoverLetter.pdf."`
 }
@@ -30,10 +31,14 @@ type Output struct {
 // Run builds the PDF and writes it to disk. Core layout preserved from the
 // original CLI: green sidebar, centered name header, two-column body with
 // contact info on the right.
-func Run(p profile.Profile, body, outputDir, filename string) (Output, error) {
+func Run(p profile.Profile, to, body, outputDir, filename string) (Output, error) {
 	body = strings.TrimSpace(body)
 	if body == "" {
 		return Output{}, fmt.Errorf("body is empty")
+	}
+	to = strings.TrimSpace(to)
+	if to == "" {
+		to = "To Whom it May Concern,"
 	}
 
 	pdf := fpdf.New("P", "mm", "Letter", "")
@@ -65,7 +70,7 @@ func Run(p profile.Profile, body, outputDir, filename string) (Output, error) {
 	// salutation + date + body in left column
 	pdf.SetXY(leftX, bodySecYCord)
 	pdf.SetFont("Helvetica", "B", 10)
-	pdf.MultiCell(leftW, 5, sanitize(tr, "To Whom it May Concern,"), "", "L", false)
+	pdf.MultiCell(leftW, 5, sanitize(tr, to), "", "L", false)
 
 	pdf.SetFont("Helvetica", "", 10)
 	pdf.SetX(leftX)
