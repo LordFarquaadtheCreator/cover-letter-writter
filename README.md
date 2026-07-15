@@ -70,6 +70,7 @@ Generate a styled PDF cover letter. Requires a profile and body text. Saves to t
 | `profileId` | string | yes | Profile ID (from `create_profile` or `list_profiles`) |
 | `body` | string | yes | Cover letter body text — the agent drafts this |
 | `to` | string | no | Recipient salutation line (e.g. `Dear Hiring Manager,`). Defaults to `To Whom it May Concern,` |
+| `template` | string | no | PDF template name. Currently supported: `green-minimal`. Defaults to `green-minimal` |
 | `outputDir` | string | no | Override profile's outputDir |
 | `filename` | string | no | Override profile's filename |
 

@@ -17,8 +17,14 @@ type Input struct {
 	ProfileID string `json:"profileId" jsonschema:"required,ID of the profile to use (from create_profile or list_profiles). Mandatory."`
 	Body      string `json:"body" jsonschema:"required,The cover letter body text. Plain text — the agent writes or drafts this."`
 	To        string `json:"to,omitempty" jsonschema:"Recipient salutation line (e.g. 'Dear Hiring Manager,' or 'Dear Jane Doe,'). Defaults to 'To Whom it May Concern,'."`
+	Template  string `json:"template,omitempty" jsonschema:"PDF template name. Currently supported: 'green-minimal'. Defaults to 'green-minimal'."`
 	OutputDir string `json:"outputDir,omitempty" jsonschema:"Override profile's outputDir. Defaults to ~/Downloads if neither set."`
 	Filename  string `json:"filename,omitempty" jsonschema:"Override profile's filename. Defaults to <Name>NoSpacesCoverLetter.pdf."`
+}
+
+// supportedTemplates maps template name to renderer. Add new templates here.
+var supportedTemplates = map[string]func(p profile.Profile, to, body string) *fpdf.Fpdf{
+	"green-minimal": renderGreenMinimal,
 }
 
 // Output is returned to the agent.
@@ -28,10 +34,10 @@ type Output struct {
 	Filename   string `json:"filename"`
 }
 
-// Run builds the PDF and writes it to disk. Core layout preserved from the
-// original CLI: green sidebar, centered name header, two-column body with
-// contact info on the right.
-func Run(p profile.Profile, to, body, outputDir, filename string) (Output, error) {
+// Run builds the PDF and writes it to disk. Dispatches rendering to the
+// template named by template (defaulting to "green-minimal") and writes the
+// result to outputDir/filename, falling back to profile defaults then ~/Downloads.
+func Run(p profile.Profile, template, to, body, outputDir, filename string) (Output, error) {
 	body = strings.TrimSpace(body)
 	if body == "" {
 		return Output{}, fmt.Errorf("body is empty")
@@ -40,7 +46,63 @@ func Run(p profile.Profile, to, body, outputDir, filename string) (Output, error
 	if to == "" {
 		to = "To Whom it May Concern,"
 	}
+	template = strings.TrimSpace(template)
+	if template == "" {
+		template = "green-minimal"
+	}
+	render, ok := supportedTemplates[template]
+	if !ok {
+		return Output{}, fmt.Errorf("unknown template %q — supported: %s", template, listTemplates())
+	}
 
+	pdf := render(p, to, body)
+
+	dir := outputDir
+	if dir == "" {
+		dir = p.OutputDir
+	}
+	if dir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return Output{}, fmt.Errorf("resolve output dir: %w", err)
+		}
+		dir = filepath.Join(home, "Downloads")
+	}
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return Output{}, fmt.Errorf("create output dir: %w", err)
+	}
+
+	fname := filename
+	if fname == "" {
+		fname = p.Filename
+	}
+	if fname == "" {
+		fname = strings.ReplaceAll(p.Name, " ", "") + "CoverLetter.pdf"
+	}
+
+	outPath := filepath.Join(dir, fname)
+	if err := pdf.OutputFileAndClose(outPath); err != nil {
+		return Output{}, fmt.Errorf("write pdf: %w", err)
+	}
+
+	return Output{
+		Message:    fmt.Sprintf("Cover letter saved to %s", outPath),
+		OutputPath: outPath,
+		Filename:   fname,
+	}, nil
+}
+
+func listTemplates() string {
+	names := make([]string, 0, len(supportedTemplates))
+	for name := range supportedTemplates {
+		names = append(names, name)
+	}
+	return strings.Join(names, ", ")
+}
+
+// renderGreenMinimal is the original cover letter layout: green sidebar,
+// centered name header, two-column body with contact info on the right.
+func renderGreenMinimal(p profile.Profile, to, body string) *fpdf.Fpdf {
 	pdf := fpdf.New("P", "mm", "Letter", "")
 	tr := pdf.UnicodeTranslatorFromDescriptor("")
 	pdf.SetAutoPageBreak(true, 25)
@@ -113,39 +175,7 @@ func Run(p profile.Profile, to, body, outputDir, filename string) (Output, error
 	pdf.SetFont("Helvetica", "", 9)
 	pdf.CellFormat(rightW, 4, sanitize(tr, p.Phone), "", 1, "L", false, 0, "")
 
-	dir := outputDir
-	if dir == "" {
-		dir = p.OutputDir
-	}
-	if dir == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return Output{}, fmt.Errorf("resolve output dir: %w", err)
-		}
-		dir = filepath.Join(home, "Downloads")
-	}
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return Output{}, fmt.Errorf("create output dir: %w", err)
-	}
-
-	fname := filename
-	if fname == "" {
-		fname = p.Filename
-	}
-	if fname == "" {
-		fname = strings.ReplaceAll(p.Name, " ", "") + "CoverLetter.pdf"
-	}
-
-	outPath := filepath.Join(dir, fname)
-	if err := pdf.OutputFileAndClose(outPath); err != nil {
-		return Output{}, fmt.Errorf("write pdf: %w", err)
-	}
-
-	return Output{
-		Message:    fmt.Sprintf("Cover letter saved to %s", outPath),
-		OutputPath: outPath,
-		Filename:   fname,
-	}, nil
+	return pdf
 }
 
 // sanitize swaps smart quotes/em dashes/ellipsis to ASCII before translation —

@@ -207,7 +207,7 @@ func handleGenerate(ctx context.Context, req *mcp.CallToolRequest, args generate
 	if err != nil {
 		return nil, generate.Output{}, err
 	}
-	out, err := generate.Run(p, args.To, args.Body, args.OutputDir, args.Filename)
+	out, err := generate.Run(p, args.Template, args.To, args.Body, args.OutputDir, args.Filename)
 	if err != nil {
 		return nil, generate.Output{}, err
 	}
