@@ -90,12 +90,6 @@ List past cover letter generations, newest first.
 go build -o cover-letter-writter .
 ```
 
-## Docker
-
-```bash
-docker build -t cover-letter-writter .
-```
-
 ## Run
 
 ```bash
@@ -106,7 +100,7 @@ No env vars required. The server starts immediately over stdio.
 
 ## MCP Config
 
-Copy `mcp-config.json` into your agent's MCP config. For Docker, mount a volume so `profiles.json` and `history.json` persist across runs.
+Copy `mcp-config.json` into your agent's MCP config.
 
 ## Files
 
@@ -117,5 +111,4 @@ Copy `mcp-config.json` into your agent's MCP config. For Docker, mount a volume 
 | `internal/profile/profile.go` | Profile struct, disk-backed store |
 | `internal/history/history.go` | History struct, disk-backed store |
 | `internal/generate/generate.go` | PDF generation logic, sanitize, layout |
-| `Dockerfile` | Multi-stage Go build → Alpine runtime |
 | `mcp-config.json` | MCP config snippet |

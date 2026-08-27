@@ -48,12 +48,6 @@ Tests across 4 packages:
 go build -o cover-letter-writter .
 ```
 
-## Docker
-
-```bash
-docker build -t cover-letter-writter .
-```
-
 ## Run
 
 No env vars required.
@@ -64,7 +58,7 @@ No env vars required.
 
 ## MCP Config
 
-Copy `mcp-config.json` into the agent's MCP config. For Docker, mount a volume so `profiles.json` and `history.json` persist.
+Copy `mcp-config.json` into the agent's MCP config.
 
 ## Key files
 
@@ -75,7 +69,6 @@ Copy `mcp-config.json` into the agent's MCP config. For Docker, mount a volume s
 | `internal/profile/profile.go` | Profile struct, disk-backed Store (CRUD) |
 | `internal/history/history.go` | History Entry struct, disk-backed Store |
 | `internal/generate/generate.go` | PDF generation: green sidebar, two-column layout, sanitize, output dir resolution |
-| `Dockerfile` | Multi-stage Go build → Alpine runtime |
 | `mcp-config.json` | MCP config snippet |
 | `internal/profile/profile_test.go` | Profile store tests |
 | `internal/history/history_test.go` | History store tests |

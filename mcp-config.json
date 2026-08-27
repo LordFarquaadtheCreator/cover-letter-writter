@@ -1,8 +1,4 @@
 {
-  "cover-letter-writter": {
-    "command": "docker",
-    "args": ["run", "--rm", "-i", "-v", "cover-letter-data:/app", "cover-letter-writter"]
-  },
   "cover-letter-writter-stdio": {
     "command": "/Users/farquaad/agents-skills/mcps/cover-letter-writter/cover-letter-writter",
     "args": []
